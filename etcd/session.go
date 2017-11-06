@@ -1,17 +1,17 @@
 package etcd
-
+/*管理端口会话*/
 import (
-	"bufio"
-	"bytes"
-	"fmt"
+
 	"github.com/coreos/etcd/clientv3"
 	"golang.org/x/net/context"
 	"log"
 	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 	"varpac"
+
+	"bytes"
+	"bufio"
+	"strings"
 )
 
 var (
@@ -20,14 +20,14 @@ var (
 	endpoints      = []string{varpac.Master.IP + ":2379"}
 )
 
-type session struct {
+type Session struct {
 	IP     string
 	Port   string
 	ConID  string
 	Status string
 }
-
-func (s session) Set(userid int) {
+//保存端口会话信息
+func (s Session) Set(userid string) {
 	
 	etcdcli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
@@ -38,35 +38,35 @@ func (s session) Set(userid int) {
 		return
 	}
 	defer etcdcli.Close()
-	useridStr := strconv.Itoa(userid)
+
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}'
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'
-	_, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/IP", s.IP)
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/IP", s.IP)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	port := s.getPort()
+	s.Port = s.getPort()
 
-	_, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/Port", port)
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Port", s.Port)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	_, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/ConID", s.ConID)
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/ConID", s.ConID)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	_, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/Status", "connected")
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 }
-
-func (s *session) Get(userid int) {
+//获取端口信息
+func (s *Session) Get(userid string) {
 	etcdcli, err := clientv3.New(clientv3.Config{
 		Endpoints: endpoints,
 		DialTimeout: dialTimeout,
@@ -76,50 +76,59 @@ func (s *session) Get(userid int) {
 		return
 	}
 	defer etcdcli.Close()
-	useridStr := strconv.Itoa(userid)
 
-	s.IP, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/IP")
+	resp, err := etcdcli.Get(context.TODO(), "/user/"+userid+"/IP")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	Port, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/Port")
+	s.IP = string(resp.Kvs[0].Value)
+
+	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/Port")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	s.ConID, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/ConID")
+	s.Port = string(resp.Kvs[0].Value)
+
+	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/ConID")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	s.Status, err = etcdcli.Put(context.TODO(), "/user/"+useridStr+"/Status")
+	s.ConID = string(resp.Kvs[0].Value)
+
+	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/Status")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
+
 }
-func (s session) isZero() bool {
+//判断是否不全
+func (s Session) isZero() bool {
 	if(s.IP!=""&&s.ConID!=""&&s.Port!=""&&s.Status!=""){
 		return false
 	}
 	return true
 }
 //get the port one container is listening on
-func (s session) getPort() port string{
+func (s Session) getPort()  string {
 	postCMD:="docker -H " + varpac.Master.IP + " :3375 " +
 		"inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'"
 
 	out, err := exec.Command("/bin/bash", "-c", postCMD+s.ConID).Output()
 	if err != nil {
 		log.Fatal(err)
-		return
+		return ""
 	}
 
 	outBuffer := bytes.NewBuffer(out)
 	outReader := bufio.NewReader(outBuffer)
 	inputstring, err := outReader.ReadString('\n')
 	slice := strings.Split(inputstring, " ")
-	port = slice[1]
+	port := slice[1]
+	return port
 }

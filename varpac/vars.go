@@ -1,39 +1,86 @@
 package varpac
-var Concurrency=0
-var sem1 = make(chan struct{},1)
-var sem2 = make(chan struct{},1)
-var Master =host {
-	IP:"11.0.57.2",
+
+import (
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+)
+
+var Concurrency = 0
+var sem1 = make(chan struct{}, 1)
+var sem2 = make(chan struct{}, 1)
+var Master = host{
+	IP: "11.0.0.172",
 }
-var Cluster []host
-type host struct{
-	IP string
-	totalMem float64
-	memload float64
-	probability float64
+var Cluster = []host{
+	host{
+		IP:       "11.0.0.171",
+		TotalMem: 32,
+	},
+	host{
+		IP:       "11.0.0.172",
+		TotalMem: 32,
+	},
+	host{
+		IP:       "11.0.0.176",
+		TotalMem: 4,
+	},
 }
-func FastVol()  {
-	select {
-	case sem1<- struct {}{}:
-		default:
-			Concurrency=(Concurrency+1)%3
+var section [3]float64
+var (
+	TEMPLATE_DIR = "../view"
+	AgentPort    = "9902"
+	DispatPort   = "9903"
+	Option       = types.ContainerCreateConfig{
+		Config: &container.Config{
+			AttachStdin: true,
+			Tty:         true,
+			Image:       "stress-bigger1",
+			Volumes: map[string]struct{}{
+				"/tempfiles": {},
+			},
+		},
+		HostConfig: &container.HostConfig{
+			Binds:     []string{"/home/docker/GoWorkspace/tempfiles/:/tempfiles"},
+			Resources: container.Resources{
+			//CPUShares:1,
+			//Memory:0,//Memory:314572800,//300M内存
+			},
+		},
 	}
+)
+
+type host struct {
+	IP       string
+	TotalMem float64
+}
+type Prob struct { //概率法计算数据
+	Host        host
+	Memload     float64
+	Probability float64 //内存在集群中的占比
 }
 
-func AccurateVol()  {
+func FastVol() {
 	select {
-	case sem2<- struct {}{}:
+	case sem1 <- struct{}{}:
 	default:
-		Concurrency=(Concurrency+1)%3
+		Concurrency = (Concurrency + 1) % 3
 	}
 }
 
-func TypeBased(){
+func AccurateVol() {
+	select {
+	case sem2 <- struct{}{}:
+	default:
+		Concurrency = (Concurrency + 1) % 3
+	}
+}
+
+func TypeBased() {
 	select {
 	case <-sem1:
 		<-sem2
 	default:
-		Concurrency=(Concurrency+1)%3
+		Concurrency = (Concurrency + 1) % 3
 	}
 
 }

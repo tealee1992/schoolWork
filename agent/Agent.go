@@ -22,7 +22,9 @@ type memStatus struct {
 	totalMem float32
 	availMem float32
 }
+
 var ioratio float32
+
 /*type logistic struct {
 	changed bool
 	correct float32
@@ -48,27 +50,28 @@ func main() {
 	http.HandleFunc("/load", aveload)
 	http.HandleFunc("/memload", memload)
 	http.HandleFunc("/cpuload", cpuload)
-	err = http.ListenAndServe(":9095", nil)
+	err = http.ListenAndServe(":9902", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 
 }
+
 /********循环每15秒更新网络包数据********/
-func loopfunc(){
+func loopfunc() {
 	spec := "*/15* * * * ?"
 	var f = func() {
 		Startdata = time.Now().Format("2006-01-02 15:04:05") + ";" + getNetbytes()
 		ioratio = ioRatio()
 	}
-	monitorloop.Execute(spec,f)
+	monitorloop.Execute(spec, f)
 }
 func bindMachine(w http.ResponseWriter, r *http.Request) {
 	var workload float32 = 0
-	var cpuratio, mempreratio, netratio ,ioratio float32
+	var cpuratio, mempreratio, netratio, ioratio float32
 	//var linknum int
-	var alpha, belta, gama,namda float32
-	var k1, k2, k3 ,k4 float32
+	var alpha, belta, gama, namda float32
+	var k1, k2, k3, k4 float32
 	alpha = 1
 	belta = 1
 	gama = 1
@@ -83,14 +86,14 @@ func bindMachine(w http.ResponseWriter, r *http.Request) {
 	netratio = networkLoad()
 	//ioratio = ioRatio()
 	//containerperc = ContainerUseMemPerc()
-	fmt.Println("cpu+",cpuratio)
-	fmt.Println("mempre+",mempreratio)
-	fmt.Println("netratio+",netratio)
-	fmt.Println("ioratio+",ioratio)
+	fmt.Println("cpu+", cpuratio)
+	fmt.Println("mempre+", mempreratio)
+	fmt.Println("netratio+", netratio)
+	fmt.Println("ioratio+", ioratio)
 	//fmt.Println(linknum)
 	//如果内存使用率（包括预测）高于0.5，对correct进行修正
 	//if mempreratio >= 0.5 && logistic.changed == false {
-		//corrChange(mempreratio, linknum)
+	//corrChange(mempreratio, linknum)
 	//}
 	//netload = logisticTran(linknum)
 
@@ -124,7 +127,7 @@ func bindMachine(w http.ResponseWriter, r *http.Request) {
 	workload = workload + namda*k4*ioratio
 	//workload = workload + k4*containerperc
 	workload64 := float64(workload)
-	result := strconv.FormatFloat(workload64,'f',-1,32)
+	result := strconv.FormatFloat(workload64, 'f', -1, 32)
 	fmt.Fprint(w, result)
 }
 func weightedSchedule(w http.ResponseWriter, r *http.Request) {
@@ -171,21 +174,21 @@ func weightedSchedule(w http.ResponseWriter, r *http.Request) {
 	workload = workload + gama*k3*netpercent
 	workload = workload + k4*containerperc
 	workload64 := float64(workload)
-	result := strconv.FormatFloat(workload64,'f',-1,32)
+	result := strconv.FormatFloat(workload64, 'f', -1, 32)
 	fmt.Fprint(w, result)
 }
 func aveload(w http.ResponseWriter, r *http.Request) {
-	var workload1,workload2 float32
+	var workload1, workload2 float32
 	var cpuratio, mempreratio, netratio float32
-	workload1=0
-	workload2=0
+	workload1 = 0
+	workload2 = 0
 
-	var k1, k2, k3 ,k4 float32
+	var k1, k2, k3, k4 float32
 	cpuratio = 0.0
-	for i:=0;i<10;i++ {
-		cpuratio = cpuratio+cpuRatio()
+	for i := 0; i < 10; i++ {
+		cpuratio = cpuratio + cpuRatio()
 	}
-	cpuratio = cpuratio/10.0
+	cpuratio = cpuratio / 10.0
 	mempreratio = mempreRatio()
 	netratio = networkLoad()
 	ioratio = ioRatio()
@@ -204,26 +207,27 @@ func aveload(w http.ResponseWriter, r *http.Request) {
 	workload2 = workload2 + 0.4*mempreratio
 	workload2 = workload2 + 0.1*netratio
 	workload2 = workload2 + 0.1*ioratio
-	workload:=strconv.FormatFloat(float64(workload1),'f',-1,32)
-	workload=workload+";"
-	workload=workload+strconv.FormatFloat(float64(workload2),'f',-1,32)
-	fmt.Println("cpu=",cpuratio)
-	fmt.Println("mem=",mempreratio)
-	fmt.Println("aveload=",workload)
+	workload := strconv.FormatFloat(float64(workload1), 'f', -1, 32)
+	workload = workload + ";"
+	workload = workload + strconv.FormatFloat(float64(workload2), 'f', -1, 32)
+	fmt.Println("cpu=", cpuratio)
+	fmt.Println("mem=", mempreratio)
+	fmt.Println("aveload=", workload)
 	fmt.Fprint(w, workload)
 }
 func memload(w http.ResponseWriter, r *http.Request) {
 	mempercent := memRatio()
 	mempercent64 := float64(mempercent)
-	result := strconv.FormatFloat(mempercent64,'f',-1,32)
+	result := strconv.FormatFloat(mempercent64, 'f', -1, 32)
 	fmt.Fprint(w, result)
 }
 func cpuload(w http.ResponseWriter, r *http.Request) {
 	cpuratio := cpuRatio()
 	cpuratio64 := float64(cpuratio)
-	result := strconv.FormatFloat(cpuratio64,'f',-1,32)
+	result := strconv.FormatFloat(cpuratio64, 'f', -1, 32)
 	fmt.Fprint(w, result)
 }
+
 /*****对tcp连接数进行logistics转换*****
 func logisticTran(numX int) float32 {
 	var logRes float32
@@ -250,7 +254,7 @@ func corrChange(memratio float32, numX int) {
 }
 */
 /*****获取iostat数据%util,io百分比******/
-func getIO() string{
+func getIO() string {
 	cmd := exec.Command("/bin/bash", "./getIO.sh")
 	outbytes, err := cmd.Output()
 	if err != nil {
@@ -261,6 +265,7 @@ func getIO() string{
 	outString = strings.TrimSpace(outString) //去除空格，换行符
 	return outString
 }
+
 /*****执行脚本，获取vmstat数据******/
 /*
 #!/bin/bash
@@ -285,15 +290,17 @@ func getCpustat() string {
 	outString = strings.TrimSpace(outString) //去除空格，换行符
 	return outString
 }
+
 /*****IO状态******/
 func ioRatio() float32 {
 	var ratio float64
 	outString := getIO()
 	outString = strings.Replace(outString, "\n", "", -1) //去除换行符
 	ratio, _ = strconv.ParseFloat(outString, 32)
-	return float32(ratio/100.0)
+	return float32(ratio / 100.0)
 
 }
+
 /*****CPU使用率vmstat******/
 func cpuRatiovm() float32 {
 	var us int64 //用户态
@@ -316,6 +323,7 @@ func cpuRatiovm() float32 {
 		return float32(us+sy) / float32(us+sy+id)
 	}
 }
+
 /*****CPU使用率iostat******/
 func cpuRatio() float32 {
 
@@ -325,10 +333,11 @@ func cpuRatio() float32 {
 
 	outString = strings.Replace(outString, "\n", "", -1) //去除换行符
 
-	idle ,_= strconv.ParseFloat(outString,32)
+	idle, _ = strconv.ParseFloat(outString, 32)
 	//fmt.Println("idel=",idle)
-	return float32(1.0-idle/100.0)
+	return float32(1.0 - idle/100.0)
 }
+
 /*****计算我的算法第二项******/
 func mempreRatio() float32 {
 
@@ -337,7 +346,7 @@ func mempreRatio() float32 {
 	memavailable := memStat.availMem
 	ConUnuse := ContainerUnuse()
 	//容器已申请，但未使用的内存，在未来有一定的可能会被使用，设可能概率为20%
-	ConUnuse = ConUnuse * 0.2/(1024.0*1024.0*1024.0)
+	ConUnuse = ConUnuse * 0.2 / (1024.0 * 1024.0 * 1024.0)
 	percent := (float32(memtotal) - float32(memavailable) + ConUnuse) / float32(memtotal)
 	return percent
 }
@@ -378,8 +387,8 @@ func memRatio() float32 {
 		}
 		outString := bytestoString(outbytes)
 		outString = strings.TrimSpace(outString) //去除空格，换行符
-		count,_:= strconv.ParseInt(outString,10,64)
-		percent1 := float32((int(count)*2*1024*1024))/float32(memtotal)+0.08
+		count, _ := strconv.ParseInt(outString, 10, 64)
+		percent1 := float32((int(count)*2*1024*1024))/float32(memtotal) + 0.08
 
 		return percent1
 	}
@@ -531,8 +540,8 @@ func memStat() memStatus {
 		}
 		outString := bytestoString(outbytes)
 		outString = strings.TrimSpace(outString) //去除空格，换行符
-		count,_:= strconv.ParseInt(outString,10,64)
-		memavailable = memtotal-int(count)*2*1024*1024-2633728//2572占内存8%
+		count, _ := strconv.ParseInt(outString, 10, 64)
+		memavailable = memtotal - int(count)*2*1024*1024 - 2633728 //2572占内存8%
 
 	}
 	memStat.totalMem = float32(memtotal)
@@ -624,8 +633,8 @@ func ContainerUnuse() float32 {
 
 	}
 	//处理字符串rawData，提取出主机为容器分配的内存数值
-	fmt.Println("reser",reservedMem)
-	fmt.Println("total",total_rss)
+	fmt.Println("reser", reservedMem)
+	fmt.Println("total", total_rss)
 	if reservedMem != 0 {
 		return float32(reservedMem - total_rss)
 	} else {
@@ -640,7 +649,7 @@ func ConMemPerc() float32 {
 
 	memStat := memStat()
 	ConUnuse := ContainerUnuse()
-	ConUnuse = ConUnuse/(1024*1024*1024)
+	ConUnuse = ConUnuse / (1024 * 1024 * 1024)
 	if memStat.totalMem != 0 {
 		return float32(ConUnuse / memStat.totalMem)
 	} else {

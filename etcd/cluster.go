@@ -1,19 +1,24 @@
 package etcd
-
+/*管理集群主机信息*/
+//to do: 定时执行update。保存进etcd？
 import (
-	"bufio"
-	"bytes"
-	"fmt"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/docker/engine-api/client"
-	"github.com/docker/engine-api/types"
-	"golang.org/x/net/context"
+	//"bufio"
+	//"bytes"
+	//"fmt"
+	//"github.com/coreos/etcd/clientv3"
+	//"github.com/docker/docker/client"
+	//"github.com/docker/docker/api/types"
+	//"github.com/docker/docker/api/types/container"
+	//"golang.org/x/net/context"
 	"log"
 	"os/exec"
-	"time"
+	//"time"
 	"varpac"
+	"strings"
+	"functions"
 )
 
+/*
 var (
 	dialTimeout    = 5 * time.Second
 	requestTimeout = 2 * time.Second
@@ -30,7 +35,7 @@ func UpdateClusterClient() {
 			// Volumes: map[string]struct{}{
 			// 	"/tempfiles": {},
 			// },
-			Cmd: []string{"list","etcd://"+varpac.Master.IP+"2379/swarm"}
+			Cmd: []string{"list","etcd://"+varpac.Master.IP+"2379/swarm"},
 		},
 		HostConfig: &container.HostConfig{
 			//AutoRemove : true,
@@ -56,21 +61,45 @@ func UpdateClusterClient() {
 	}
 
 }
+*/
 
 //直接执行cmd命令 swarm list 获取cluster nodes
 func UpdateCluster() {
-	CMD := "docker run --rm swarm list " + varpac.Master.IP + ":2379/swarm"
+	CMD := "docker run --rm swarm list etcd://" + varpac.Master.IP + ":2379/swarm"
 	out, err := exec.Command("/bin/bash", "-c", CMD).Output()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	outBuffer := bytes.NewBuffer(out)
-	outReader := bufio.NewReader(outBuffer)
-	inputstring, err := outReader.ReadString('\n')
-	//处理
+	//outBuffer := bytes.NewBuffer(out)
+	//outReader := bufio.NewReader(outBuffer)
+
+	//inputstring, err := outReader.ReadSlice('\n')
+	//n := bytes.IndexByte(out,0)
+	ipString := string(out)
+	Ips := strings.Split(ipString,"\n")
+	//处理字串，得到所有的主机ip
+	n := len(Ips)
+	for index,ip := range Ips  {
+		//  11.0.57.1:2375
+		if index < n-1 {//最后一个是换行符
+			//fmt.Println("ip",index,":",ip)    11.0.57.1:2375
+			Ips[index] = strings.Split(ip,":")[0]
+			//fmt.Println("ip",index,":",Ips[index])    11.0.57.1
+		}
+	}
+	//保存集群信息
+	for index,ip := range Ips {
+		if index < n-1 {
+			varpac.Cluster[index].IP = ip
+			varpac.Cluster[index].TotalMem = functions.GetMemload(ip)
+		}
+	}
+
 }
+
+/*
 func UpdtClusbyEtcd() {
 	etcdcli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
@@ -90,7 +119,10 @@ func UpdtClusbyEtcd() {
 		fmt.Println("resp: ", resp)
 	}
 
-	outBuffer := bytes.NewBuffer(out)
-	outReader := bufio.NewReader(outBuffer)
+	values := resp.Kvs
+	values[0].Value
 
-}
+	outReader := bufio.NewReader(outBuffer)
+	//etcd 没有保存
+	log.Println(outReader)
+}*/
