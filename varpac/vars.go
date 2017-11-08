@@ -49,6 +49,9 @@ var (
 	}
 )
 
+//保存实验image的标志
+var title = "labimage"
+
 type host struct {
 	IP       string
 	TotalMem float64

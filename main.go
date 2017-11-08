@@ -2,6 +2,8 @@ package main
 
 /*server 入口*/
 import (
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -14,6 +16,8 @@ import (
 var templates = make(map[string]*template.Template)
 
 func init() {
+
+	//页面模板
 	TEMPLATE_DIR := varpac.TEMPLATE_DIR
 	fileInfoArr, err := ioutil.ReadDir(TEMPLATE_DIR)
 	check("failed to read template", err)
@@ -34,7 +38,7 @@ func init() {
 
 func main() {
 
-	http.HandleFunc("/containers/set", safeHandler(setImage))
+	http.HandleFunc("/containers/setimage", safeHandler(setImage))
 	http.HandleFunc("/containers/create", safeHandler(createContainer))
 	http.HandleFunc("/containers/list", safeHandler(listContainer))
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
@@ -66,9 +70,45 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	locals["UserId"] = "111111"
 	renderHtml(w, "index.html", locals)
 }
+func hasImage() {
+	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("select * from labimage")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	columns, _ := rows.Columns()
+	if len(columns) == 0 {
+		stmt, err := db.Prepare(`insert labimage (title,imagename) values (?,?)`)
+		if err != nil {
+			log.Fatal(err)
+		}
+		res, err := stmt.Exec(varpac.title, "")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 func setImage(w http.ResponseWriter, r *http.Request) {
 	imageName := r.FormValue("imagename")
 	//写入数据库
+	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare(`update labimage set imagename=? where title= ?`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	res, err := stmt.Exec(imageName, varpac.title)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	log.Fatal(imageName)
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
