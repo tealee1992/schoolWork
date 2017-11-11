@@ -89,21 +89,25 @@ func setLog() {
 func hasImage() {
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
 	if err != nil {
+		fmt.Println(err)
 		loger.Fatal(err)
 	}
 	defer db.Close()
 	rows, err := db.Query("select * from labimage")
 	if err != nil {
+		fmt.Println(err)
 		loger.Fatalln(err)
 	}
 	columns, _ := rows.Columns()
 	if len(columns) == 0 {
 		stmt, err := db.Prepare(`insert labimage (title,imagename) values (?,?)`)
 		if err != nil {
+			fmt.Println(err)
 			loger.Fatal(err)
 		}
 		_, err = stmt.Exec(varpac.Title, "")
 		if err != nil {
+			fmt.Println(err)
 			loger.Fatal(err)
 		}
 	}
