@@ -87,7 +87,7 @@ func hasImage() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		res, err := stmt.Exec(varpac.title, "")
+		res, err := stmt.Exec(varpac.Title, "")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -106,7 +106,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	res, err := stmt.Exec(imageName, varpac.title)
+	res, err := stmt.Exec(imageName, varpac.Title)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -122,7 +122,7 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 	url, err := ioutil.ReadAll(resp.Body)
 	check("", err)
-	w.Write([]byte("http://" + string(url) + "?password=" + varpac.pasword))
+	w.Write([]byte("http://" + string(url) + "?password=" + varpac.Password))
 	// http.Redirect(w, r, "http://"+string(url)+"", http.StatusFound)
 }
 

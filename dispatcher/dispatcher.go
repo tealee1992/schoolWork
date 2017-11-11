@@ -48,9 +48,9 @@ func init() {
 		sum += host.TotalMem
 	}
 	for index, host := range varpac.Cluster {
-		varpac.section[index] = host.TotalMem / sum
+		varpac.Section[index] = host.TotalMem / sum
 		if index > 0 {
-			varpac.section[index] = varpac.section[index] + varpac.section[index-1]
+			varpac.Section[index] = varpac.Section[index] + varpac.Section[index-1]
 		}
 	}
 }
@@ -126,7 +126,7 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 
 func fast(w http.ResponseWriter) {
 
-	section := varpac.section
+	section := varpac.Section
 	seed := rand.NewSource(time.Now().Unix())
 	newrand := rand.New(seed)
 	randnum := newrand.Float64()

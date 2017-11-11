@@ -25,7 +25,7 @@ var Cluster = []host{
 		TotalMem: 4,
 	},
 }
-var section [3]float64
+var Section [3]float64
 var (
 	TEMPLATE_DIR = "../view"
 	AgentPort    = "9902"
@@ -50,10 +50,10 @@ var (
 )
 
 //保存实验image的标志
-var title = "labimage"
+var Title = "labimage"
 
 //novnc密码
-var password = "novnc"
+var Password = "novnc"
 
 type host struct {
 	IP       string
