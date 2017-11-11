@@ -3,19 +3,25 @@ package main
 /*server 入口*/
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"runtime/debug"
 	"varpac"
 )
 
 var templates = make(map[string]*template.Template)
+var logFile *os.File
+var loger *log.Logger
 
 func init() {
+	//设置日志
+	setLog()
 	//判断是否有labimage
 	hasImage()
 	//页面模板
@@ -30,7 +36,7 @@ func init() {
 			continue
 		}
 		templatesPath = TEMPLATE_DIR + "/" + templateName
-		log.Println("Loading template:", templatesPath)
+		loger.Println("Loading template:", templatesPath)
 		t := template.Must(template.ParseFiles(templatesPath))
 		templates[templateName] = t
 	}
@@ -47,7 +53,7 @@ func main() {
 	http.HandleFunc("/", safeHandler(homePage))
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
-		log.Fatal("ListenAndServe:", err.Error())
+		loger.Fatal("ListenAndServe:", err.Error())
 	}
 
 }
@@ -57,9 +63,9 @@ func safeHandler(fn http.HandlerFunc) http.HandlerFunc {
 		defer func() {
 			if e, ok := recover().(error); ok {
 				http.Error(w, e.Error(), http.StatusInternalServerError)
-				log.Printf("warn: panic in %v - %v", fn, e)
+				loger.Printf("warn: panic in %v - %v", fn, e)
 
-				log.Println(string(debug.Stack()))
+				loger.Println(string(debug.Stack()))
 			}
 		}()
 		fn(w, r)
@@ -71,25 +77,34 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	locals["UserId"] = "111111"
 	renderHtml(w, "index.html", locals)
 }
+
+func setLog() {
+	logFile, err := os.Create("./logs.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+	loger = log.New(logFile, "cloudlab_go_server_", log.Ldate|log.Ltime|log.Lshortfile)
+}
+
 func hasImage() {
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
 	if err != nil {
-		log.Fatal(err)
+		loger.Fatal(err)
 	}
 	defer db.Close()
 	rows, err := db.Query("select * from labimage")
 	if err != nil {
-		log.Fatalln(err)
+		loger.Fatalln(err)
 	}
 	columns, _ := rows.Columns()
 	if len(columns) == 0 {
 		stmt, err := db.Prepare(`insert labimage (title,imagename) values (?,?)`)
 		if err != nil {
-			log.Fatal(err)
+			loger.Fatal(err)
 		}
 		_, err = stmt.Exec(varpac.Title, "")
 		if err != nil {
-			log.Fatal(err)
+			loger.Fatal(err)
 		}
 	}
 }
@@ -98,19 +113,19 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	//写入数据库
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
 	if err != nil {
-		log.Fatal(err)
+		loger.Fatal(err)
 	}
 	defer db.Close()
 
 	stmt, err := db.Prepare(`update labimage set imagename=? where title= ?`)
 	if err != nil {
-		log.Fatalln(err)
+		loger.Fatalln(err)
 	}
 	_, err = stmt.Exec(imageName, varpac.Title)
 	if err != nil {
-		log.Fatalln(err)
+		loger.Fatalln(err)
 	}
-	log.Fatal(imageName)
+	loger.Fatal(imageName)
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
 	userid := r.FormValue("userid")
@@ -139,7 +154,7 @@ func restore(w http.ResponseWriter, r *http.Request) {
 }
 func check(logstr string, err error) {
 	if err != nil {
-		log.Fatal(logstr)
+		loger.Fatal(logstr)
 		panic(err)
 	}
 }
