@@ -91,6 +91,7 @@ func hasImage() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Println("insert labimage" + res)
 	}
 }
 func setImage(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +111,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("update labimage" + res)
 	log.Fatal(imageName)
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
