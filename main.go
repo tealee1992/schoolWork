@@ -87,11 +87,10 @@ func hasImage() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		res, err := stmt.Exec(varpac.Title, "")
+		_, err = stmt.Exec(varpac.Title, "")
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("insert labimage" + res)
 	}
 }
 func setImage(w http.ResponseWriter, r *http.Request) {
@@ -107,11 +106,10 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	res, err := stmt.Exec(imageName, varpac.Title)
+	_, err = stmt.Exec(imageName, varpac.Title)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("update labimage" + res)
 	log.Fatal(imageName)
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
