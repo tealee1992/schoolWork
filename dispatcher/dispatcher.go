@@ -1,4 +1,4 @@
-package dispatcher
+package main
 
 /*调度器
 to do : 修改hard code：主机信息，算法中的排序。

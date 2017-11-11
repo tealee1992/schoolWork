@@ -52,6 +52,9 @@ var (
 //保存实验image的标志
 var title = "labimage"
 
+//novnc密码
+var password = "novnc"
+
 type host struct {
 	IP       string
 	TotalMem float64

@@ -16,7 +16,8 @@ import (
 var templates = make(map[string]*template.Template)
 
 func init() {
-
+	//判断是否有labimage
+	hasImage()
 	//页面模板
 	TEMPLATE_DIR := varpac.TEMPLATE_DIR
 	fileInfoArr, err := ioutil.ReadDir(TEMPLATE_DIR)
@@ -121,8 +122,8 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 	url, err := ioutil.ReadAll(resp.Body)
 	check("", err)
-
-	http.Redirect(w, r, "http://"+string(url)+"", http.StatusFound)
+	w.Write([]byte("http://" + string(url) + "?password=" + varpac.pasword))
+	// http.Redirect(w, r, "http://"+string(url)+"", http.StatusFound)
 }
 
 func listContainer(w http.ResponseWriter, r *http.Request) {
