@@ -27,7 +27,7 @@ var Cluster = []host{
 }
 var Section [3]float64
 var (
-	TEMPLATE_DIR = "../view"
+	TEMPLATE_DIR = "./views"
 	AgentPort    = "9902"
 	DispatPort   = "9903"
 	Option       = types.ContainerCreateConfig{
