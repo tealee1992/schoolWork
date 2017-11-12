@@ -21,9 +21,9 @@ var logFile *os.File
 var loger *log.Logger
 
 type Entry struct {
-	code string
-	data string
-	msg  string
+	code string `json:"code"`
+	data string `json:"data"`
+	msg  string `json:"msg"`
 }
 
 func init() {
@@ -152,7 +152,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		entry.code = "failed"
 	}
-	loger.Println(entry.code)
+	loger.Println(entry)
 	if err = json.NewEncoder(w).Encode(entry); err != nil {
 		panic(err)
 	}
