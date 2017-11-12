@@ -3,6 +3,7 @@ package main
 /*server 入口*/
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
@@ -18,6 +19,12 @@ import (
 var templates = make(map[string]*template.Template)
 var logFile *os.File
 var loger *log.Logger
+
+type Entry struct {
+	code string
+	data string
+	msg  string
+}
 
 func init() {
 	//设置日志
@@ -51,7 +58,7 @@ func main() {
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
 	http.HandleFunc("/containers/restore", safeHandler(restore))
 	http.HandleFunc("/", safeHandler(homePage))
-	err := http.ListenAndServe(":9090", nil)
+	err := http.ListenAndServe(":9901", nil)
 	if err != nil {
 		loger.Fatal("ListenAndServe:", err.Error())
 	}
@@ -124,11 +131,56 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	_, err = stmt.Exec(imageName, varpac.Title)
+	res, err = stmt.Exec(imageName, varpac.Title)
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	loger.Fatal(imageName)
+	num, err := res.RowAffected()
+	check("update image", err)
+	var entry Entry
+	if num == 1 {
+		loger.Println(imageName)
+		entry.code = "success"
+	} else {
+		entry.code = "failed"
+	}
+
+	if err = json.NewEncoder(w).Encode(entry); err != nil {
+		panic(err)
+	}
+}
+func getImage(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
+	if err != nil {
+		loger.Fatal(err)
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare(`select imagename from labimage where title= ?`)
+	if err != nil {
+		loger.Fatalln(err)
+	}
+	rows, err = stmt.Query(varpac.Title)
+	if err != nil {
+		loger.Fatalln(err)
+	}
+	loger.Println(imageName)
+	var imagename string
+	for rows.Next() {
+		rows.Scan(&imagename)
+	}
+	var entry Entry
+	if imagename != "" {
+		entry.code = "success"
+		entry.data = imagename
+	} else {
+		entry.code = "success"
+		entry.data = imagename
+	}
+
+	if err = json.NewEncoder(w).Encode(entry); err != nil {
+		panic(err)
+	}
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
 	userid := r.FormValue("userid")
