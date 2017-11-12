@@ -53,7 +53,7 @@ func init() {
 func main() {
 
 	http.HandleFunc("/containers/setimage", safeHandler(setImage))
-	http.HandleFunc("/containers/getimage", safeHandler(getImage)
+	http.HandleFunc("/containers/getimage", safeHandler(getImage))
 	http.HandleFunc("/containers/create", safeHandler(createContainer))
 	http.HandleFunc("/containers/list", safeHandler(listContainer))
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
@@ -76,6 +76,9 @@ func safeHandler(fn http.HandlerFunc) http.HandlerFunc {
 				loger.Println(string(debug.Stack()))
 			}
 		}()
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("content-type", "application/json")
 		fn(w, r)
 	}
 }
