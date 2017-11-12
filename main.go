@@ -123,7 +123,12 @@ func hasImage() {
 	}
 }
 func setImage(w http.ResponseWriter, r *http.Request) {
-	imageName := r.FormValue("imagename")
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	var labimage map[string]interface{}
+	json.Unmarshal(data, &labimage)
+	imageName := labimage["image"]
+	loger.Println(imageName)
 	//写入数据库
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
 	if err != nil {
@@ -147,7 +152,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		entry.code = "failed"
 	}
-
+	loger.Println(entry.code)
 	if err = json.NewEncoder(w).Encode(entry); err != nil {
 		panic(err)
 	}
@@ -176,8 +181,7 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 		entry.code = "success"
 		entry.data = imagename
 	} else {
-		entry.code = "success"
-		entry.data = imagename
+		entry.code = "failed"
 	}
 
 	if err = json.NewEncoder(w).Encode(entry); err != nil {
