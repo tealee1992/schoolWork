@@ -53,6 +53,7 @@ func init() {
 func main() {
 
 	http.HandleFunc("/containers/setimage", safeHandler(setImage))
+	http.HandleFunc("/containers/getimage", safeHandler(getImage)
 	http.HandleFunc("/containers/create", safeHandler(createContainer))
 	http.HandleFunc("/containers/list", safeHandler(listContainer))
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
@@ -135,7 +136,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	num, err := res.RowAffected()
+	num, err := res.RowsAffected()
 	check("update image", err)
 	var entry Entry
 	if num == 1 {
