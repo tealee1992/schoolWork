@@ -21,9 +21,9 @@ var logFile *os.File
 var loger *log.Logger
 
 type Entry struct {
-	code string `json:"code"`
-	data string `json:"data"`
-	msg  string `json:"msg"`
+	Code string `json:"code"`
+	Data string `json:"data"`
+	Msg  string `json:"msg"`
 }
 
 func init() {
@@ -148,9 +148,9 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	check("update image", err)
 	entry := Entry{}
 	if num == 1 {
-		entry.code = "success"
+		entry.Code = "success"
 	} else {
-		entry.code = "failed"
+		entry.Code = "failed"
 	}
 	resp, err := json.Marshal(entry)
 	if err != nil {
@@ -180,10 +180,10 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 	}
 	entry := Entry{}
 	if imagename != "" {
-		entry.code = "success"
-		entry.data = imagename
+		entry.Code = "success"
+		entry.Data = imagename
 	} else {
-		entry.code = "failed"
+		entry.Code = "failed"
 	}
 	resp, err := json.Marshal(entry)
 	if err != nil {
