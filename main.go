@@ -131,7 +131,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	res, err = stmt.Exec(imageName, varpac.Title)
+	res, err := stmt.Exec(imageName, varpac.Title)
 	if err != nil {
 		loger.Fatalln(err)
 	}
@@ -139,7 +139,6 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	check("update image", err)
 	var entry Entry
 	if num == 1 {
-		loger.Println(imageName)
 		entry.code = "success"
 	} else {
 		entry.code = "failed"
@@ -160,11 +159,10 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	rows, err = stmt.Query(varpac.Title)
+	rows, err := stmt.Query(varpac.Title)
 	if err != nil {
 		loger.Fatalln(err)
 	}
-	loger.Println(imageName)
 	var imagename string
 	for rows.Next() {
 		rows.Scan(&imagename)
