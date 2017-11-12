@@ -152,9 +152,12 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		entry.code = "failed"
 	}
-	resp, _ := json.Marshal(entry)
-	loger.Println(resp)
-	fmt.Fprint(w, resp)
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
 }
 func getImage(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
@@ -182,9 +185,12 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		entry.code = "failed"
 	}
-	resp, _ := json.Marshal(entry)
-	loger.Println(resp)
-	fmt.Fprint(w, resp)
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
 	userid := r.FormValue("userid")
