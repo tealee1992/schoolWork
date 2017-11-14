@@ -245,23 +245,25 @@ func getpace(ip string, cpudemand int) float64 {
 	if memratio >= 0.8 || cpuratio >= 0.8 {
 		return -1.0
 	}
-
+	//这里的逻辑仅仅是用来跑实验的，真正的算法需要获取容器真实的请求选项，
+	//可以是全局变量。
 	if cpudemand == 0 {
 		conMemory = float64(0.0)
 		conCpu = 0.0625
 	} else {
-		conMemory = float64(options2.HostConfig.Resources.Memory)
+
+		conMemory = float64(varpac.Option.HostConfig.Resources.Memory)
 		conCpu = 0.0
 	}
 	diff_before = math.Abs(memratio - cpuratio)
 
 	var totalmem float64
 	if strings.EqualFold(ip, "11.0.57.1") {
-		totalmem = pro.host1.totalMem
+		totalmem = varpac.Cluster[0].totalMem
 	} else if strings.EqualFold(ip, "11.0.57.2") {
-		totalmem = pro.host2.totalMem
+		totalmem = varpac.Cluster[1].totalMem
 	} else {
-		totalmem = pro.host3.totalMem
+		totalmem = varpac.Cluster[2].totalMem
 	}
 	memratio_after := (memratio*totalmem*1024*1024*1024 + conMemory) / (totalmem * 1024 * 1024 * 1024)
 	cpuratio_after := cpuratio + conCpu
