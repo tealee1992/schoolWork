@@ -44,7 +44,7 @@ var userid string
 func init() {
 	//初始化集群信息
 	var sum float64
-	for index, host := range varpac.Cluster {
+	for _, host := range varpac.Cluster {
 		sum += host.TotalMem
 	}
 	for index, host := range varpac.Cluster {
@@ -74,7 +74,7 @@ func main() {
 }
 
 func loopfunc() {
-	spec := "*/15 * * * * ?"
+	spec := "*/15 * * * *"
 	var f = func() {
 		defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 		cli, err := client.NewClient("http://"+varpac.Master.IP+":3375", "v1.23", nil, defaultHeaders)
@@ -158,7 +158,7 @@ func accurate(w http.ResponseWriter) {
 	var hostloadMin float64
 	var hostip string
 	hostloadMin = 0
-	for index, host := range varpac.Cluster {
+	for _, host := range varpac.Cluster {
 
 		resp, err := http.Get("http://" + host.IP + ":" + varpac.AgentPort + "/bindMachine")
 		if err != nil {
@@ -259,11 +259,11 @@ func getpace(ip string, cpudemand int) float64 {
 
 	var totalmem float64
 	if strings.EqualFold(ip, "11.0.57.1") {
-		totalmem = varpac.Cluster[0].totalMem
+		totalmem = varpac.Cluster[0].TotalMem
 	} else if strings.EqualFold(ip, "11.0.57.2") {
-		totalmem = varpac.Cluster[1].totalMem
+		totalmem = varpac.Cluster[1].TotalMem
 	} else {
-		totalmem = varpac.Cluster[2].totalMem
+		totalmem = varpac.Cluster[2].TotalMem
 	}
 	memratio_after := (memratio*totalmem*1024*1024*1024 + conMemory) / (totalmem * 1024 * 1024 * 1024)
 	cpuratio_after := cpuratio + conCpu
