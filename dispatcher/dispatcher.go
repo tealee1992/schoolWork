@@ -169,7 +169,7 @@ func accurate(w http.ResponseWriter) {
 		if err != nil {
 			log.Fatal("error in jiexi")
 		}
-		hostload, _ = strconv.ParseFloat(string(body), 32)
+		hostload, _ := strconv.ParseFloat(string(body), 32)
 		if hostload < hostloadMin {
 			hostloadMin = hostload
 			hostip = host.IP
@@ -203,31 +203,31 @@ func typeBsed(cpudemand int) {
 	pace1 = getpace(ip1, cpudemand)
 	pace2 = getpace(ip2, cpudemand)
 	pace3 = getpace(ip3, cpudemand)
-	var option types.ContainerCreateConfig
+	// var option types.ContainerCreateConfig
 
-	if cpudemand == 0 {
-		option = options1
-	} else {
-		option = options2
-	}
+	// if cpudemand == 0 {
+	// 	option = options1
+	// } else {
+	// 	option = options2
+	// }
 
 	fmt.Println(pace1)
 	fmt.Println(pace2)
 	fmt.Println(pace3)
 	if pace1 > pace2 {
 		if pace1 > pace3 {
-			createContainer("1", option)
+			createContainer("1")
 			fmt.Println("type1")
 		} else {
-			createContainer("3", option)
+			createContainer("3")
 			fmt.Println("type3")
 		}
 	} else {
 		if pace2 > pace3 {
-			createContainer("2", option)
+			createContainer("2")
 			fmt.Println("type2")
 		} else {
-			createContainer("3", option)
+			createContainer("3")
 			fmt.Println("type3")
 		}
 	}

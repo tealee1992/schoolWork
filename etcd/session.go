@@ -2,8 +2,8 @@ package etcd
 
 /*管理端口会话*/
 import (
+	"context"
 	"github.com/coreos/etcd/clientv3"
-	"golang.org/x/net/context"
 	"log"
 	"os/exec"
 	"time"
