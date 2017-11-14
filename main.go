@@ -53,7 +53,7 @@ func init() {
 func main() {
 
 	http.HandleFunc("/containers/setimage", safeHandler(setImage))
-	http.HandleFunc("/containers/getimage", safeHandler(getImage))
+	http.HandleFunc("/containers/getlabimage", safeHandler(getLabImage))
 	http.HandleFunc("/containers/create", safeHandler(createContainer))
 	http.HandleFunc("/containers/list", safeHandler(listContainer))
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
@@ -159,7 +159,7 @@ func setImage(w http.ResponseWriter, r *http.Request) {
 	loger.Println(string(resp))
 	fmt.Fprint(w, string(resp))
 }
-func getImage(w http.ResponseWriter, r *http.Request) {
+func getLabImage(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
 	if err != nil {
 		loger.Fatal(err)
@@ -195,15 +195,24 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 func createContainer(w http.ResponseWriter, r *http.Request) {
 	userid := r.FormValue("userid")
 	//创建容器请求，返回容器的url
-	resp, err := http.Get(varpac.Master.IP + ":9092/dispatch?userid=" + userid)
+	Resp, err := http.Get(varpac.Master.IP + ":9903/dispatch?userid=" + userid)
 
 	check("failed to dispatch new container ", err)
 
-	defer resp.Body.Close()
-	url, err := ioutil.ReadAll(resp.Body)
+	defer Resp.Body.Close()
+	url, err := ioutil.ReadAll(Resp.Body)
 	check("", err)
-	w.Write([]byte("http://" + string(url) + "?password=" + varpac.Password))
+	// w.Write([]byte("http://" + string(url) + "?password=" + varpac.Password))
 	// http.Redirect(w, r, "http://"+string(url)+"", http.StatusFound)
+	loger.Println(url)
+	entry := Entry{}
+	entry.Data = "http://" + string(url) + "?password=" + varpac.Password
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
 }
 
 func listContainer(w http.ResponseWriter, r *http.Request) {

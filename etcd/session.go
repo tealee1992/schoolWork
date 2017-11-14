@@ -1,7 +1,7 @@
 package etcd
+
 /*管理端口会话*/
 import (
-
 	"github.com/coreos/etcd/clientv3"
 	"golang.org/x/net/context"
 	"log"
@@ -9,8 +9,8 @@ import (
 	"time"
 	"varpac"
 
-	"bytes"
 	"bufio"
+	"bytes"
 	"strings"
 )
 
@@ -26,9 +26,10 @@ type Session struct {
 	ConID  string
 	Status string
 }
+
 //保存端口会话信息
 func (s Session) Set(userid string) {
-	
+
 	etcdcli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
@@ -65,12 +66,13 @@ func (s Session) Set(userid string) {
 		return
 	}
 }
+
 //获取端口信息
 func (s *Session) Get(userid string) {
 	etcdcli, err := clientv3.New(clientv3.Config{
-		Endpoints: endpoints,
+		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
-		})
+	})
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -105,18 +107,19 @@ func (s *Session) Get(userid string) {
 		return
 	}
 
-
 }
+
 //判断是否不全
 func (s Session) isZero() bool {
-	if(s.IP!=""&&s.ConID!=""&&s.Port!=""&&s.Status!=""){
+	if s.IP != "" && s.ConID != "" && s.Port != "" && s.Status != "" {
 		return false
 	}
 	return true
 }
+
 //get the port one container is listening on
-func (s Session) getPort()  string {
-	postCMD:="docker -H " + varpac.Master.IP + " :3375 " +
+func (s Session) getPort() string {
+	postCMD := "docker -H " + varpac.Master.IP + " :3375 " +
 		"inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'"
 
 	out, err := exec.Command("/bin/bash", "-c", postCMD+s.ConID).Output()

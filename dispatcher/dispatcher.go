@@ -114,10 +114,11 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 
 	userid = r.FormValue("userid")
 	if varpac.Concurrency == 0 {
-		fast(w)
+		fmt.Println("fast")
+		//fast(w)
 	} else if varpac.Concurrency == 1 {
-
-		accurate(w)
+		fmt.Println("accurate")
+		//accurate(w)
 	} else if varpac.Concurrency == 2 {
 
 		//typeBsed(w)
