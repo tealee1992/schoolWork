@@ -56,7 +56,7 @@ func init() {
 }
 func main() {
 	//循环检测docker容器状态
-	go loopfunc()
+	//go loopfunc()
 
 	listener, err := net.Listen("tcp", varpac.Master.IP+":"+varpac.DispatPort)
 	if err != nil {
@@ -115,10 +115,10 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 	userid = r.FormValue("userid")
 	if varpac.Concurrency == 0 {
 		fmt.Println("fast")
-		//fast(w)
+		fast(w)
 	} else if varpac.Concurrency == 1 {
 		fmt.Println("accurate")
-		//accurate(w)
+		accurate(w)
 	} else if varpac.Concurrency == 2 {
 
 		//typeBsed(w)
