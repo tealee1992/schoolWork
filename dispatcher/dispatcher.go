@@ -83,7 +83,7 @@ func setLog() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	loger = log.New(logFile, "cloudlab_go_server_", log.Ldate|log.Ltime|log.Lshortfile)
+	loger = log.New(logFile, "cloudlab_dispatcher_server_", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func loopfunc() {
@@ -125,7 +125,13 @@ func loopfunc() {
 
 func dispatch(w http.ResponseWriter, r *http.Request) {
 
-	userid = r.FormValue("userid")
+	// userid = r.FormValue("userid")
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	userid := user["userid"]
+	loger.Println(userid)
 	if varpac.Concurrency == 0 {
 		loger.Println("fast")
 		fast(w)
