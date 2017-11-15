@@ -125,12 +125,12 @@ func loopfunc() {
 
 func dispatch(w http.ResponseWriter, r *http.Request) {
 
-	// userid = r.FormValue("userid")
-	defer r.Body.Close()
-	data, _ := ioutil.ReadAll(r.Body)
-	var user map[string]interface{}
-	json.Unmarshal(data, &user)
-	userid := user["userid"]
+	userid = r.FormValue("userid")
+	// defer r.Body.Close()
+	// data, _ := ioutil.ReadAll(r.Body)
+	// var user map[string]interface{}
+	// json.Unmarshal(data, &user)
+	// userid := user["userid"]
 	loger.Println(userid)
 	if varpac.Concurrency == 0 {
 		loger.Println("fast")

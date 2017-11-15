@@ -193,7 +193,12 @@ func getLabImage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(resp))
 }
 func createContainer(w http.ResponseWriter, r *http.Request) {
-	userid := r.FormValue("userid")
+
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	userid := user["userid"]
 	//创建容器请求，返回容器的url
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)
 

@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
-	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -34,22 +33,37 @@ func (s Session) Set(userid string) {
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
 	})
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer etcdcli.Close()
 
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}'
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/IP", s.IP)
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	s.Port = s.getPort()
 
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Port", s.Port)
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/ConID", s.ConID)
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 //获取端口信息
@@ -59,14 +73,14 @@ func (s *Session) Get(userid string) {
 		DialTimeout: dialTimeout,
 	})
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	defer etcdcli.Close()
 
 	resp, err := etcdcli.Get(context.TODO(), "/user/"+userid+"/IP")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -74,21 +88,21 @@ func (s *Session) Get(userid string) {
 
 	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/Port")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	s.Port = string(resp.Kvs[0].Value)
 
 	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/ConID")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	s.ConID = string(resp.Kvs[0].Value)
 
 	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/Status")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -109,7 +123,7 @@ func (s Session) getPort() string {
 
 	out, err := exec.Command("/bin/bash", "-c", postCMD+s.ConID).Output()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return ""
 	}
 
