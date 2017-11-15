@@ -34,22 +34,22 @@ func (s Session) Set(userid string) {
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
 	})
-	check("", err)
+	fmt.Println(err)
 	defer etcdcli.Close()
 
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}'
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/IP", s.IP)
-	check("", err)
+	fmt.Println(err)
 
 	s.Port = s.getPort()
 
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Port", s.Port)
-	check("", err)
+	fmt.Println(err)
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/ConID", s.ConID)
-	check("", err)
+	fmt.Println(err)
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
-	check("", err)
+	fmt.Println(err)
 }
 
 //获取端口信息

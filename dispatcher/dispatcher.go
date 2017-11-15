@@ -21,6 +21,7 @@ import (
 	"monitorloop"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -40,6 +41,8 @@ import (
 
 // var pro probability
 var userid string
+var logFile *os.File
+var loger *log.Logger
 
 func init() {
 	//设置日志
