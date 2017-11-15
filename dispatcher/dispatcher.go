@@ -42,6 +42,8 @@ import (
 var userid string
 
 func init() {
+	//设置日志
+	setLog()
 	//初始化集群信息
 	var sum float64
 	for _, host := range varpac.Cluster {
@@ -71,6 +73,14 @@ func main() {
 	http.Handle("/dispatch", dispatch)
 	http.Serve(listener, dispatch)
 
+}
+
+func setLog() {
+	logFile, err := os.Create("./logs.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+	loger = log.New(logFile, "cloudlab_go_server_", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func loopfunc() {
@@ -114,10 +124,10 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 
 	userid = r.FormValue("userid")
 	if varpac.Concurrency == 0 {
-		fmt.Println("fast")
+		loger.Println("fast")
 		fast(w)
 	} else if varpac.Concurrency == 1 {
-		fmt.Println("accurate")
+		loger.Println("accurate")
 		accurate(w)
 	} else if varpac.Concurrency == 2 {
 
@@ -126,7 +136,7 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func fast(w http.ResponseWriter) {
-
+	loger.Println("in fast")
 	section := varpac.Section
 	seed := rand.NewSource(time.Now().Unix())
 	newrand := rand.New(seed)
@@ -141,6 +151,7 @@ func fast(w http.ResponseWriter) {
 	}
 
 	var conid string
+	loger.Println("before create")
 	conid = createContainer(hostip)
 	// set lab session
 	labSession := etcd.Session{
@@ -148,8 +159,10 @@ func fast(w http.ResponseWriter) {
 		ConID:  conid,
 		Status: "started",
 	}
+	loger.Println("before set session,userid:" + userid)
 	labSession.Set(userid)
 	varpac.FastVol()
+	loger.Println("before write resp")
 	w.Write([]byte(hostip + labSession.Port))
 
 }

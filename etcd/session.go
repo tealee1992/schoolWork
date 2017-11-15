@@ -2,16 +2,16 @@ package etcd
 
 /*管理端口会话*/
 import (
+	"bufio"
+	"bytes"
 	"context"
+	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 	"varpac"
-
-	"bufio"
-	"bytes"
-	"strings"
 )
 
 var (
@@ -34,37 +34,22 @@ func (s Session) Set(userid string) {
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
 	})
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	check("", err)
 	defer etcdcli.Close()
 
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}'
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/IP", s.IP)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	check("", err)
 
 	s.Port = s.getPort()
 
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Port", s.Port)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	check("", err)
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/ConID", s.ConID)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	check("", err)
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	check("", err)
 }
 
 //获取端口信息
