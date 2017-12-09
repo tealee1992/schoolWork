@@ -87,7 +87,7 @@ func setLog() {
 }
 
 func loopfunc() {
-	spec := "*/15 * * * *"
+	spec := "* */15 * * * *"
 	var f = func() {
 		defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 		cli, err := client.NewClient("http://"+varpac.Master.IP+":3375", "v1.23", nil, defaultHeaders)
@@ -152,16 +152,19 @@ func fast(w http.ResponseWriter) {
 	randnum := newrand.Float64()
 
 	var hostip string
+	var portnum int64
 	for index, sec := range section {
 		if randnum < sec {
 			hostip = varpac.Cluster[index].IP
+			portnum = varpac.Cluster[index].PortNum
+			varpac.Cluster[index].PortNum = (portnum + 1) % 500
 			break
 		}
 	}
 
 	var conid string
 	loger.Println("before create")
-	conid = createContainer(hostip)
+	conid = createContainer(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
 		IP:     hostip,
@@ -179,8 +182,9 @@ func fast(w http.ResponseWriter) {
 func accurate(w http.ResponseWriter) {
 	var hostloadMin float64
 	var hostip string
+	var portnum int64
 	hostloadMin = 0
-	for _, host := range varpac.Cluster {
+	for index, host := range varpac.Cluster {
 
 		resp, err := http.Get("http://" + host.IP + ":" + varpac.AgentPort + "/bindMachine")
 		if err != nil {
@@ -195,11 +199,13 @@ func accurate(w http.ResponseWriter) {
 		if hostload < hostloadMin {
 			hostloadMin = hostload
 			hostip = host.IP
+			portnum = host.PortNum
+			varpac.Cluster[index].PortNum = (portnum + 1) % 500 //修改端口差值
 		}
 	}
 
 	var conid string
-	conid = createContainer(hostip)
+	conid = createContainer(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
 		IP:     hostip,
@@ -238,18 +244,18 @@ func typeBsed(cpudemand int) {
 	fmt.Println(pace3)
 	if pace1 > pace2 {
 		if pace1 > pace3 {
-			createContainer("1")
+			createContainer("1", 1)
 			fmt.Println("type1")
 		} else {
-			createContainer("3")
+			createContainer("3", 1)
 			fmt.Println("type3")
 		}
 	} else {
 		if pace2 > pace3 {
-			createContainer("2")
+			createContainer("2", 1)
 			fmt.Println("type2")
 		} else {
-			createContainer("3")
+			createContainer("3", 1)
 			fmt.Println("type3")
 		}
 	}
@@ -306,10 +312,11 @@ func getpace(ip string, cpudemand int) float64 {
 
 //used by getpace
 
-func createContainer(hostip string) string {
+func createContainer(hostip string, portnum int64) string {
 	var option types.ContainerCreateConfig
 	option = varpac.Option
-
+	port := 9500 + portnum
+	option.HostConfig.PortBindings["6080/tcp"][0].HostPort = strconv.Itoa(int(port))
 	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	cli, err := client.NewClient("http://"+hostip+":2375", "v1.23", nil, defaultHeaders)
 	if err != nil {
