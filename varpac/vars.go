@@ -3,7 +3,7 @@ package varpac
 import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
+	"github.com/docker/docker/vendor/github.com/docker/go-connections/nat"
 )
 
 var Concurrency = 0
