@@ -3,6 +3,7 @@ package varpac
 import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 )
 
 var Concurrency = 0
@@ -15,17 +16,17 @@ var Cluster = []host{
 	host{
 		IP:       "11.0.0.171",
 		TotalMem: 32,
-		PortNum: 0,
+		PortNum:  0,
 	},
 	host{
 		IP:       "11.0.0.172",
 		TotalMem: 32,
-		PortNum: 0,
+		PortNum:  0,
 	},
 	host{
 		IP:       "11.0.0.176",
 		TotalMem: 4,
-		PortNum: 0,
+		PortNum:  0,
 	},
 }
 var Section [3]float64
@@ -48,11 +49,13 @@ var (
 			//CPUShares:1,
 			//Memory:0,//Memory:314572800,//300M内存
 			},
-			PortBindings: {
-				"6080/tcp": [{
-					//HostIp: "",
-					"HostPort": "9500"//端口范围是9500~9999
-				}]
+			PortBindings: nat.PortMap{
+				"6080/tcp": []nat.PortBinding{
+					{
+						HostIP:   "",
+						HostPort: "9500", //端口范围是9500~9999
+					},
+				},
 			},
 		},
 	}
@@ -67,7 +70,7 @@ var Password = "novnc"
 type host struct {
 	IP       string
 	TotalMem float64
-	PortNum int64
+	PortNum  int64
 }
 type Prob struct { //概率法计算数据
 	Host        host
