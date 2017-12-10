@@ -220,51 +220,35 @@ func accurate(w http.ResponseWriter) {
 
 func typeBsed(cpudemand int) {
 
-	var pace1 float64
-	var pace2 float64
-	var pace3 float64
-	var ip1 = "11.0.57.1"
-	var ip2 = "11.0.57.2"
-	var ip3 = "11.0.57.3"
+	var maxpace float64
+	var hostip string
+	var portnum int64
 
-	//获取容器内存分配
-	pace1 = getpace(ip1, cpudemand)
-	pace2 = getpace(ip2, cpudemand)
-	pace3 = getpace(ip3, cpudemand)
 	// var option types.ContainerCreateConfig
-
+	maxpace = -10
+	for index, host := range varpac.Cluster {
+		ip := host.IP
+		totalmem := host.TotalMem
+		pace := getpace(ip, cpudemand, totalmem)
+		if pace > maxpace {
+			maxpace = pace
+			hostip = ip
+			portnum = host.PortNum
+			varpac.Cluster[index].PortNum = (portnum + 1) % 500 //修改端口差值
+		}
+	}
+	createContainer(hostip, portnum)
 	// if cpudemand == 0 {
 	// 	option = options1
 	// } else {
 	// 	option = options2
 	// }
 
-	fmt.Println(pace1)
-	fmt.Println(pace2)
-	fmt.Println(pace3)
-	if pace1 > pace2 {
-		if pace1 > pace3 {
-			createContainer("1", 1)
-			fmt.Println("type1")
-		} else {
-			createContainer("3", 1)
-			fmt.Println("type3")
-		}
-	} else {
-		if pace2 > pace3 {
-			createContainer("2", 1)
-			fmt.Println("type2")
-		} else {
-			createContainer("3", 1)
-			fmt.Println("type3")
-		}
-	}
-
 	varpac.TypeBased()
-
+	w.Write([]byte(hostip + labSession.Port))
 }
 
-func getpace(ip string, cpudemand int) float64 {
+func getpace(ip string, cpudemand int, totalmem float64) float64 {
 	var cpuratio, memratio, diff_before, diff_after, pace float64
 	//conmemory := options.HostConfig.Resources.Memory
 	var conMemory, conCpu float64
@@ -285,14 +269,6 @@ func getpace(ip string, cpudemand int) float64 {
 	}
 	diff_before = math.Abs(memratio - cpuratio)
 
-	var totalmem float64
-	if strings.EqualFold(ip, "11.0.57.1") {
-		totalmem = varpac.Cluster[0].TotalMem
-	} else if strings.EqualFold(ip, "11.0.57.2") {
-		totalmem = varpac.Cluster[1].TotalMem
-	} else {
-		totalmem = varpac.Cluster[2].TotalMem
-	}
 	memratio_after := (memratio*totalmem*1024*1024*1024 + conMemory) / (totalmem * 1024 * 1024 * 1024)
 	cpuratio_after := cpuratio + conCpu
 	diff_after = math.Abs(float64(memratio_after) - float64(cpuratio_after))
@@ -316,7 +292,8 @@ func createContainer(hostip string, portnum int64) string {
 	var option types.ContainerCreateConfig
 	option = varpac.Option
 	port := 9500 + portnum
-	option.HostConfig.PortBindings["6080/tcp"][0].HostPort = strconv.Itoa(int(port))
+	port_str := strconv.Itoa(int(port))
+	option.HostConfig.PortBindings["6080/tcp"][0].HostPort = port_str
 	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	cli, err := client.NewClient("http://"+hostip+":2375", "v1.23", nil, defaultHeaders)
 	if err != nil {
