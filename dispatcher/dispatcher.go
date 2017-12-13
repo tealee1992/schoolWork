@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+	//"strings"
 	"time"
 	"varpac"
 )
@@ -218,7 +218,7 @@ func accurate(w http.ResponseWriter) {
 
 }
 
-func typeBsed(cpudemand int) {
+func typeBsed(w http.ResponseWriter, cpudemand int) {
 
 	var maxpace float64
 	var hostip string
@@ -237,14 +237,16 @@ func typeBsed(cpudemand int) {
 			varpac.Cluster[index].PortNum = (portnum + 1) % 500 //修改端口差值
 		}
 	}
-	createContainer(hostip, portnum)
-	// if cpudemand == 0 {
-	// 	option = options1
-	// } else {
-	// 	option = options2
-	// }
-
-	varpac.TypeBased()
+	var conid string
+	conid = createContainer(hostip, portnum)
+	// set lab session
+	labSession := etcd.Session{
+		IP:     hostip,
+		ConID:  conid,
+		Status: "started",
+	}
+	labSession.Set(userid)
+	varpac.AccurateVol()
 	w.Write([]byte(hostip + labSession.Port))
 }
 
