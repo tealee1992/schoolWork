@@ -198,7 +198,10 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	data, _ := ioutil.ReadAll(r.Body)
 	var user map[string]interface{}
 	json.Unmarshal(data, &user)
-	userid := user["userid"]
+	userid, err := user["userid"].(string)
+	if err != nil {
+		loger.Panicln(err)
+	}
 	loger.Println(userid)
 	//创建容器请求，返回容器的url
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)
