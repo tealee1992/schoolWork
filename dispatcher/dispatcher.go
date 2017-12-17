@@ -164,6 +164,7 @@ func fast(w http.ResponseWriter) {
 
 	var conid string
 	loger.Println("before create")
+	hostip = "11.0.0.172" //for test
 	conid = createContainer(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
