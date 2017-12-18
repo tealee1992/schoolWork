@@ -79,7 +79,7 @@ func main() {
 }
 
 func setLog() {
-	logFile, err := os.Create("./logs.txt")
+	logFile, err := os.Create("./dispatcher/logs.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -166,20 +166,33 @@ func fast(w http.ResponseWriter) {
 	loger.Println("before create")
 	hostip = "11.0.0.172" //for test
 	conid = createContainer(hostip, portnum)
+	url := urlgenerater(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
 		IP:     hostip,
 		ConID:  conid,
 		Status: "started",
+		Url:    url,
 	}
 	loger.Println("before set session,userid:" + userid)
 	labSession.Set(userid)
 	varpac.FastVol()
 	loger.Println("before write resp")
-	w.Write([]byte(hostip + labSession.Port))
+
+	w.Write([]byte(url))
 
 }
 
+//生成前端对应的容器访问url,因为需要做一个从前端路由器到服务器的端口映射
+//比如 11.0.0.172:5901对应前端url是100.64.16.72:25901
+func urlgenerater(ip string, portnum int64) (url string) {
+	hostnum := varpac.IpMap[ip]
+	port := 9500 + portnum
+	port_str := strconv.Itoa(int(port))
+
+	url = varpac.OutIp + hostnum + port_str
+	return
+}
 func accurate(w http.ResponseWriter) {
 	var hostloadMin float64
 	var hostip string
@@ -207,6 +220,7 @@ func accurate(w http.ResponseWriter) {
 
 	var conid string
 	conid = createContainer(hostip, portnum)
+	url := urlgenerater(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
 		IP:     hostip,
@@ -240,6 +254,7 @@ func typeBsed(w http.ResponseWriter, cpudemand int) {
 	}
 	var conid string
 	conid = createContainer(hostip, portnum)
+	url := urlgenerater(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
 		IP:     hostip,

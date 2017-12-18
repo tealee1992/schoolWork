@@ -24,6 +24,7 @@ type Session struct {
 	Port   string
 	ConID  string
 	Status string
+	Url    string
 }
 
 //保存端口会话信息
@@ -60,6 +61,11 @@ func (s Session) Set(userid string) {
 		return
 	}
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Url", s.Url)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -133,4 +139,12 @@ func (s Session) getPort() string {
 	slice := strings.Split(inputstring, " ")
 	port := slice[1]
 	return port
+}
+func (s Session) getUrl() {
+
+}
+
+//设置容器状态
+func (s Session) setStatus(status int) {
+
 }

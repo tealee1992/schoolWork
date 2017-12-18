@@ -12,6 +12,7 @@ var sem2 = make(chan struct{}, 1)
 var Master = host{
 	IP: "11.0.0.172",
 }
+var OutIp = "100.64.16.72"
 var Cluster = []host{
 	host{
 		IP:       "11.0.0.171",
@@ -28,6 +29,12 @@ var Cluster = []host{
 		TotalMem: 4,
 		PortNum:  0,
 	},
+}
+
+var IpMap = map[string]string{
+	"11.0.0.171": "1",
+	"11.0.0.172": "2",
+	"11.0.0.176": "3",
 }
 var Section [3]float64
 var (
