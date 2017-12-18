@@ -196,11 +196,13 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	data, _ := ioutil.ReadAll(r.Body)
+	loger.Println(data)
 	var user map[string]interface{}
 	json.Unmarshal(data, &user)
+	loger.Println(user)
 	userid, ok := user["userid"].(string)
-	if ok {
-		loger.Panicln("userid in not string")
+	if !ok {
+		loger.Println("type assertion err")
 	}
 	loger.Println(userid)
 	return
