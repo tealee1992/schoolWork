@@ -229,7 +229,7 @@ func accurate(w http.ResponseWriter) {
 	}
 	labSession.Set(userid)
 	varpac.AccurateVol()
-	w.Write([]byte(hostip + labSession.Port))
+	w.Write([]byte(url))
 
 }
 
@@ -263,7 +263,7 @@ func typeBsed(w http.ResponseWriter, cpudemand int) {
 	}
 	labSession.Set(userid)
 	varpac.AccurateVol()
-	w.Write([]byte(hostip + labSession.Port))
+	w.Write([]byte(url))
 }
 
 func getpace(ip string, cpudemand int, totalmem float64) float64 {

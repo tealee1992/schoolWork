@@ -208,7 +208,11 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)
 
 	check("failed to dispatch new container ", err)
-
+	if err != nil {
+		entry.Code = "fail"
+	} else {
+		entry.Code = "success"
+	}
 	defer Resp.Body.Close()
 	url, err := ioutil.ReadAll(Resp.Body)
 	check("", err)
@@ -221,6 +225,7 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		loger.Println(err)
 	}
+
 	loger.Println(string(resp))
 	fmt.Fprint(w, string(resp))
 }
