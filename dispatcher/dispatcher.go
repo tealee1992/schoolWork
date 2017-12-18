@@ -190,7 +190,7 @@ func urlgenerater(ip string, portnum int64) (url string) {
 	port := 9500 + portnum
 	port_str := strconv.Itoa(int(port))
 
-	url = varpac.OutIp + hostnum + port_str
+	url = varpac.OutIp + ":" + hostnum + port_str
 	return
 }
 func accurate(w http.ResponseWriter) {

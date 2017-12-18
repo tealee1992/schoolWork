@@ -16,7 +16,7 @@ import (
 var (
 	dialTimeout    = 5 * time.Second
 	requestTimeout = 2 * time.Second
-	endpoints      = []string{varpac.Master.IP + ":2379"}
+	endpoints      = []string{"127.0.0.1:2379"}
 )
 
 type Session struct {
