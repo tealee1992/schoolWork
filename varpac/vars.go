@@ -89,7 +89,7 @@ func FastVol() {
 	select {
 	case sem1 <- struct{}{}:
 	default:
-		Concurrency = (Concurrency + 1) % 3
+		Concurrency = (Concurrency + 1) % 10
 	}
 }
 

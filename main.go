@@ -212,7 +212,7 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	//创建容器请求，返回容器的url
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)
 
-	check("failed to dispatch new container ", err)
+	loger.Println(err)
 	if err != nil {
 		entry.Code = "fail"
 	} else {
