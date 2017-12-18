@@ -157,7 +157,9 @@ func fast(w http.ResponseWriter) {
 		if randnum < sec {
 			hostip = varpac.Cluster[index].IP
 			portnum = varpac.Cluster[index].PortNum
+			loger.Println(varpac.Cluster[index].PortNum)
 			varpac.Cluster[index].PortNum = (portnum + 1) % 500
+			loger.Println(varpac.Cluster[index].PortNum)
 			break
 		}
 	}
