@@ -204,6 +204,7 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	}
 	loger.Println(userid)
 	return
+	entry := Entry{}
 	//创建容器请求，返回容器的url
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)
 
@@ -219,7 +220,7 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 	// w.Write([]byte("http://" + string(url) + "?password=" + varpac.Password))
 	// http.Redirect(w, r, "http://"+string(url)+"", http.StatusFound)
 	loger.Println(url)
-	entry := Entry{}
+
 	entry.Data = "http://" + string(url) + "?password=" + varpac.Password
 	resp, err := json.Marshal(entry)
 	if err != nil {
