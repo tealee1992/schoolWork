@@ -205,7 +205,9 @@ func createContainer(w http.ResponseWriter, r *http.Request) {
 		loger.Println("type assertion err")
 	}
 	loger.Println(userid)
-	return
+	if userid == "" {
+		return
+	}
 	entry := Entry{}
 	//创建容器请求，返回容器的url
 	Resp, err := http.Get("http://" + varpac.Master.IP + ":9903/dispatch?userid=" + userid)

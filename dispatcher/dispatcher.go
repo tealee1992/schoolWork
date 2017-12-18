@@ -178,7 +178,7 @@ func fast(w http.ResponseWriter) {
 	labSession.Set(userid)
 	varpac.FastVol()
 	loger.Println("before write resp")
-
+	loger.Println(url)
 	w.Write([]byte(url))
 
 }
