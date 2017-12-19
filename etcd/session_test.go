@@ -21,6 +21,14 @@ func Test_Set(t *testing.T) {
 	fmt.Println("end of set")
 }
 
+func Test_Get(t *testing.T) {
+	var labSession Session
+	labSession.Get("000")
+	fmt.Println(labSession.ConID)
+	fmt.Println(labSession.IP)
+	fmt.Println(labSession.Port)
+	fmt.Println("end of GET")
+}
 func Test_GetPort(t *testing.T) {
 	conid := "0945a9b40e4e"
 	hostip := "11.0.0.172"
