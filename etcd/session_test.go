@@ -40,7 +40,7 @@ func Test_GetPort(t *testing.T) {
 		Status: "started",
 		Url:    url,
 	}
-	userid := "000"
+	// userid := "000"
 	port := labSession.getPort()
 	t.Log(port)
 	fmt.Println("port:" + port)
