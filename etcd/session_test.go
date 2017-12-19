@@ -41,7 +41,6 @@ func Test_GetPort(t *testing.T) {
 		Url:    url,
 	}
 	userid := "000"
-	labSession.Set(userid)
 	port := labSession.getPort()
 	t.Log(port)
 	fmt.Println("port:" + port)
