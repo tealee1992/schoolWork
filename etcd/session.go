@@ -132,9 +132,9 @@ func (s Session) isZero() bool {
 //get the port one container is listening on
 func (s Session) getPort() string {
 	postCMD := "docker -H " + varpac.Master.IP + " :3375 " +
-		"inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'"
+		"inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "
 	fmt.Println("in get port")
-	out, err := exec.Command("/bin/bash", "-c", postCMD+s.ConID).Output()
+	out, err := exec.Command("/bin/bash", "-c", postCMD+" "+s.ConID).Output()
 	if err != nil {
 		fmt.Println(err)
 		return ""
