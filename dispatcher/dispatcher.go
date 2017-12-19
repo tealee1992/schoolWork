@@ -132,14 +132,15 @@ func dispatch(w http.ResponseWriter, r *http.Request) {
 	// json.Unmarshal(data, &user)
 	// userid := user["userid"]
 	loger.Println(userid)
-	if varpac.Concurrency == 0 {
+	//for test
+	if varpac.Concurrency >= 0 {
 		loger.Println("fast")
 		fast(w)
 	} else if varpac.Concurrency == 1 {
 		loger.Println("accurate")
 		accurate(w)
 	} else if varpac.Concurrency == 2 {
-
+		loger.Panicln("type")
 		//typeBsed(w)
 	}
 }
@@ -168,6 +169,7 @@ func fast(w http.ResponseWriter) {
 	loger.Println("before create")
 	hostip = "11.0.0.172" //for test
 	conid = createContainer(hostip, portnum)
+	loger.Println("conid: " + conid)
 	url := urlgenerater(hostip, portnum)
 	// set lab session
 	labSession := etcd.Session{
