@@ -34,37 +34,44 @@ func (s Session) Set(userid string) {
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
 	})
+	fmt.Println("1")
 	if err != nil {
 		fmt.Println(err)
+		fmt.Println("chuang jian shibai")
 		return
 	}
 	defer etcdcli.Close()
 
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}'
 	//docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}'
+	fmt.Println("2")
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/IP", s.IP)
 	if err != nil {
 		fmt.Println(err)
+		fmt.Println("IP shibai")
 		return
 	}
 
-	s.Port = s.getPort()
-
+	//s.Port = s.getPort()
+	fmt.Println("3")
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Port", s.Port)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("4")
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/ConID", s.ConID)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("5")
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("6")
 	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Url", s.Url)
 	if err != nil {
 		fmt.Println(err)

@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -17,6 +18,7 @@ func Test_Set(t *testing.T) {
 	}
 	userid := "000"
 	labSession.Set(userid)
+	fmt.Println("end of set")
 }
 
 func Test_GetPort(t *testing.T) {
@@ -32,5 +34,8 @@ func Test_GetPort(t *testing.T) {
 	}
 	userid := "000"
 	labSession.Set(userid)
+	port := labSession.getPort()
 	t.Log(port)
+	fmt.Println("port:" + port)
+	fmt.Println("end of get")
 }
