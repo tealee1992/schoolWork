@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"runtime/debug"
 	"varpac"
@@ -214,11 +215,6 @@ func init_student(w http.ResponseWriter, r *http.Request) {
 	}
 	entry := Entry{}
 	labSession.Get(userid)
-	if err != nil {
-		entry.Code = "fail"
-	} else {
-		entry.Code = "success"
-	}
 	entry.Data = map[string]string{
 		"status": labSession.Status,
 		"url":    labSession.Url,
@@ -346,7 +342,7 @@ func restore(w http.ResponseWriter, r *http.Request) {
 	//启动容器
 	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 		"start" + labSession.ConID
-	out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+	out, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
@@ -383,7 +379,7 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 	//暂停容器
 	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 		"stop" + labSession.ConID
-	out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+	out, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
