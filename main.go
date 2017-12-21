@@ -296,7 +296,7 @@ func checkpoint(w http.ResponseWriter, r *http.Request) {
 	saveCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 		"exec -ti " + labSession.ConID + " bash eclipseReload.sh"
 
-	out, err := exec.Command("/bin/bash", "-c", saveCMD).Output()
+	_, err := exec.Command("/bin/bash", "-c", saveCMD).Output()
 	if err != nil {
 		fmt.Println(err)
 		entry.Code = "fail"
@@ -304,7 +304,7 @@ func checkpoint(w http.ResponseWriter, r *http.Request) {
 		//暂停容器
 		stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 			"stop" + labSession.ConID
-		out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+		_, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
 		if err != nil {
 			loger.Println(err)
 			entry.Code = "fail"
@@ -342,7 +342,7 @@ func restore(w http.ResponseWriter, r *http.Request) {
 	//启动容器
 	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 		"start" + labSession.ConID
-	out, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
+	_, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
@@ -379,7 +379,7 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 	//暂停容器
 	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 		"stop" + labSession.ConID
-	out, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
+	_, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
@@ -387,7 +387,7 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 		//移除容器
 		rmCMD := "docker -H " + varpac.Master.IP + ":3375 " +
 			"rm" + labSession.ConID
-		out, err = exec.Command("/bin/bash", "-c", rmCMD).Output()
+		_, err = exec.Command("/bin/bash", "-c", rmCMD).Output()
 		if err != nil {
 			loger.Println(err)
 		} else {
