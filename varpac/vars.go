@@ -51,7 +51,7 @@ var (
 			},
 		},
 		HostConfig: &container.HostConfig{
-			Binds:     []string{"/home/docker/GoWorkspace/tempfiles/:/tempfiles"},
+			Binds:     []string{"/home/docker/GoWorkspace/src/agent/:/tempfiles"},
 			Resources: container.Resources{
 			//CPUShares:1,
 			//Memory:0,//Memory:314572800,//300M内存

@@ -4,6 +4,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"etcd"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
@@ -21,9 +22,9 @@ var logFile *os.File
 var loger *log.Logger
 
 type Entry struct {
-	Code string `json:"code"`
-	Data string `json:"data"`
-	Msg  string `json:"msg"`
+	Code string      `json:"code"`
+	Data interface{} `json:"data"`
+	Msg  string      `json:"msg"`
 }
 
 func init() {
@@ -54,10 +55,12 @@ func main() {
 
 	http.HandleFunc("/containers/setimage", safeHandler(setImage))
 	http.HandleFunc("/containers/getlabimage", safeHandler(getLabImage))
+	http.HandleFunc("/containers/init", safeHandler(init_student))
 	http.HandleFunc("/containers/create", safeHandler(createContainer))
 	http.HandleFunc("/containers/list", safeHandler(listContainer))
 	http.HandleFunc("/containers/checkpoint", safeHandler(checkpoint))
 	http.HandleFunc("/containers/restore", safeHandler(restore))
+	http.HandleFunc("/containers/destroy", safeHandler(destroy))
 	http.HandleFunc("/", safeHandler(homePage))
 	err := http.ListenAndServe(":9901", nil)
 	if err != nil {
@@ -192,6 +195,42 @@ func getLabImage(w http.ResponseWriter, r *http.Request) {
 	loger.Println(string(resp))
 	fmt.Fprint(w, string(resp))
 }
+func init_student(w http.ResponseWriter, r *http.Request) {
+	var labSession etcd.Session
+
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	loger.Println(data)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	loger.Println(user)
+	userid, ok := user["userid"].(string)
+	if !ok {
+		loger.Println("type assertion err")
+	}
+	loger.Println(userid)
+	if userid == "" {
+		return
+	}
+	entry := Entry{}
+	labSession.Get(userid)
+	if err != nil {
+		entry.Code = "fail"
+	} else {
+		entry.Code = "success"
+	}
+	entry.Data = map[string]string{
+		"status": labSession.Status,
+		"url":    labSession.Url,
+	}
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
+}
 func createContainer(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
@@ -240,16 +279,138 @@ func listContainer(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkpoint(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	loger.Println(data)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	loger.Println(user)
+	userid, ok := user["userid"].(string)
+	if !ok {
+		loger.Println("type assertion err")
+	}
+	loger.Println(userid)
+	if userid == "" {
+		return
+	}
+	entry := Entry{}
+	var labSession etcd.Session
+	labSession.Get(userid)
+	//通过docker exec 执行保存eclipse的脚本
+	saveCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+		"exec -ti " + labSession.ConID + " bash eclipseReload.sh"
 
+	out, err := exec.Command("/bin/bash", "-c", saveCMD).Output()
+	if err != nil {
+		fmt.Println(err)
+		entry.Code = "fail"
+	} else {
+		//暂停容器
+		stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+			"stop" + labSession.ConID
+		out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+		if err != nil {
+			loger.Println(err)
+			entry.Code = "fail"
+		} else {
+			entry.Code = "success"
+		}
+	}
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
 }
 
 func restore(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	loger.Println(data)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	loger.Println(user)
+	userid, ok := user["userid"].(string)
+	if !ok {
+		loger.Println("type assertion err")
+	}
+	loger.Println(userid)
+	if userid == "" {
+		return
+	}
+	entry := Entry{}
+	var labSession etcd.Session
+	labSession.Get(userid)
+	//启动容器
+	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+		"start" + labSession.ConID
+	out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+	if err != nil {
+		loger.Println(err)
+		entry.Code = "fail"
+	} else {
+		entry.Code = "success"
+	}
 
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
+}
+func destroy(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	data, _ := ioutil.ReadAll(r.Body)
+	loger.Println(data)
+	var user map[string]interface{}
+	json.Unmarshal(data, &user)
+	loger.Println(user)
+	userid, ok := user["userid"].(string)
+	if !ok {
+		loger.Println("type assertion err")
+	}
+	loger.Println(userid)
+	if userid == "" {
+		return
+	}
+	entry := Entry{}
+	var labSession etcd.Session
+	labSession.Get(userid)
+	//暂停容器
+	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+		"stop" + labSession.ConID
+	out, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
+	if err != nil {
+		loger.Println(err)
+		entry.Code = "fail"
+	} else {
+		//移除容器
+		rmCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+			"rm" + labSession.ConID
+		out, err = exec.Command("/bin/bash", "-c", rmCMD).Output()
+		if err != nil {
+			loger.Println(err)
+		} else {
+			entry.Code = "success"
+		}
+	}
+
+	resp, err := json.Marshal(entry)
+	if err != nil {
+		loger.Println(err)
+	}
+
+	loger.Println(string(resp))
+	fmt.Fprint(w, string(resp))
 }
 func check(logstr string, err error) {
 	if err != nil {
 		loger.Fatal(logstr)
-		panic(err)
+		loger.Println(err)
 	}
 }
 
