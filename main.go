@@ -214,7 +214,12 @@ func init_student(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	entry := Entry{}
-	labSession.Get(userid)
+	if labSession.isExist(userid) {
+		labSession.Get(userid)
+	} else {
+		labSession.Status = "none"
+		labSession.Url = "#"
+	}
 	entry.Data = map[string]string{
 		"status": labSession.Status,
 		"url":    labSession.Url,
@@ -363,7 +368,7 @@ func restore(w http.ResponseWriter, r *http.Request) {
 
 //设置容器状态
 func setStatus(userid string, status string) {
-	SetStatus(userid, status)
+	etcd.SetStatus(userid, status)
 }
 func destroy(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()

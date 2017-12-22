@@ -84,7 +84,6 @@ func (s *Session) Get(userid string) {
 		return
 	}
 	defer etcdcli.Close()
-
 	resp, err := etcdcli.Get(context.TODO(), "/user/"+userid+"/IP")
 	if err != nil {
 		fmt.Println(err)
@@ -113,6 +112,27 @@ func (s *Session) Get(userid string) {
 		return
 	}
 
+}
+
+//判断是否存在该user的session
+//这个函数理想的做法是 利用etcd的api询问是否有该userid的记录
+//但是etcdcli没有这样的操作，只能以报错来作为判断依据了，没时间了。。。
+func (s Session) isExist(userid string) bool {
+	etcdcli, err := clientv3.New(clientv3.Config{
+		Endpoints:   endpoints,
+		DialTimeout: dialTimeout,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer etcdcli.Close()
+	resp, err := etcdcli.Get(context.TODO(), "/user/"+userid+"/IP")
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
 }
 
 //判断是否不全
