@@ -310,6 +310,7 @@ func checkpoint(w http.ResponseWriter, r *http.Request) {
 			entry.Code = "fail"
 		} else {
 			entry.Code = "success"
+			setStatus(userid, "saved")
 		}
 	}
 	resp, err := json.Marshal(entry)
@@ -348,6 +349,7 @@ func restore(w http.ResponseWriter, r *http.Request) {
 		entry.Code = "fail"
 	} else {
 		entry.Code = "success"
+		setStatus(userid, "created")
 	}
 
 	resp, err := json.Marshal(entry)
@@ -357,6 +359,11 @@ func restore(w http.ResponseWriter, r *http.Request) {
 
 	loger.Println(string(resp))
 	fmt.Fprint(w, string(resp))
+}
+
+//设置容器状态
+func setStatus(userid string, status string) {
+	SetStatus(userid, status)
 }
 func destroy(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -392,6 +399,7 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 			loger.Println(err)
 		} else {
 			entry.Code = "success"
+			setStatus(userid, "none")
 		}
 	}
 

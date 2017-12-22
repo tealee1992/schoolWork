@@ -61,7 +61,7 @@ func (s Session) Set(userid string) {
 		fmt.Println(err)
 		return
 	}
-	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "connected")
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "created")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -145,6 +145,19 @@ func (s Session) getUrl() {
 }
 
 //设置容器状态
-func (s Session) setStatus(status int) {
-
+func SetStatus(userid string, status string) {
+	etcdcli, err := clientv3.New(clientv3.Config{
+		Endpoints:   endpoints,
+		DialTimeout: dialTimeout,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer etcdcli.Close()
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", status)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
