@@ -306,16 +306,43 @@ func getpace(ip string, cpudemand int, totalmem float64) float64 {
 	return result
 }
 
-//used by getpace
+//get labimage
+func getLabimage() string {
+	db, err := sql.Open("mysql", "root:abcd1234!@tcp(localhost:3306)/cloudlab?parseTime=true")
+	if err != nil {
+		loger.Fatal(err)
+	}
+	defer db.Close()
 
-//used by getpace
+	stmt, err := db.Prepare(`select imagename from labimage where title= ?`)
+	if err != nil {
+		loger.Fatalln(err)
+	}
+	rows, err := stmt.Query(varpac.Title)
+	if err != nil {
+		loger.Fatalln(err)
+	}
+	var imagename string
+	for rows.Next() {
+		rows.Scan(&imagename)
+	}
 
+	if imagename != "" {
+		imagename = "os-zh-cn-bochs2.4-2"
+	}
+
+	return imagename
+}
 func createContainer(hostip string, portnum int64) string {
 	var option types.ContainerCreateConfig
 	option = varpac.Option
 	port := 9500 + portnum
 	port_str := strconv.Itoa(int(port))
 	option.HostConfig.PortBindings["6080/tcp"][0].HostPort = port_str
+
+	imagename := getLabimage()
+	option.Config.Image = imagename
+
 	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	cli, err := client.NewClient("http://"+hostip+":2375", "v1.23", nil, defaultHeaders)
 	if err != nil {
