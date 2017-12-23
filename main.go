@@ -220,6 +220,7 @@ func init_student(w http.ResponseWriter, r *http.Request) {
 		labSession.Status = "none"
 		labSession.Url = "#"
 	}
+	entry.Code = "success"
 	entry.Data = map[string]string{
 		"status": labSession.Status,
 		"url":    labSession.Url,
