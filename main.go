@@ -391,7 +391,8 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 	labSession.Get(userid)
 	//暂停容器
 	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
-		"stop" + labSession.ConID
+		"stop " + labSession.ConID
+	loger.Println(stopCMD)
 	_, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
 	if err != nil {
 		loger.Println(err)
@@ -399,7 +400,8 @@ func destroy(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//移除容器
 		rmCMD := "docker -H " + varpac.Master.IP + ":3375 " +
-			"rm" + labSession.ConID
+			"rm " + labSession.ConID
+		loger.Println(rmCMD)
 		_, err = exec.Command("/bin/bash", "-c", rmCMD).Output()
 		if err != nil {
 			loger.Println(err)
