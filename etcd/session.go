@@ -134,7 +134,7 @@ func (s Session) IsExist(userid string) bool {
 		fmt.Println("etcd Get err")
 		return false
 	}
-	if resp == nil {
+	if resp.Kvs == nil || len(resp.Kvs) == 0 {
 		fmt.Println("there is not log of this user")
 		return false
 	}
