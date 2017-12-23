@@ -309,7 +309,7 @@ func checkpoint(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//暂停容器
 		stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
-			"stop" + labSession.ConID
+			"stop " + labSession.ConID
 		_, err = exec.Command("/bin/bash", "-c", stopCMD).Output()
 		if err != nil {
 			loger.Println(err)
@@ -347,9 +347,9 @@ func restore(w http.ResponseWriter, r *http.Request) {
 	var labSession etcd.Session
 	labSession.Get(userid)
 	//启动容器
-	stopCMD := "docker -H " + varpac.Master.IP + ":3375 " +
-		"start" + labSession.ConID
-	_, err := exec.Command("/bin/bash", "-c", stopCMD).Output()
+	startCMD := "docker -H " + varpac.Master.IP + ":3375 " +
+		"start " + labSession.ConID
+	_, err := exec.Command("/bin/bash", "-c", startCMD).Output()
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
