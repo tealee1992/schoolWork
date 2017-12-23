@@ -214,7 +214,7 @@ func init_student(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	entry := Entry{}
-	if labSession.isExist(userid) {
+	if labSession.IsExist(userid) {
 		labSession.Get(userid)
 	} else {
 		labSession.Status = "none"
