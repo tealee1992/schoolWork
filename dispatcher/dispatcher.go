@@ -24,6 +24,7 @@ import (
 	"os"
 	"strconv"
 	//"strings"
+	_ "github.com/go-sql-driver/mysql"
 	"time"
 	"varpac"
 )

@@ -135,7 +135,7 @@ func (s Session) IsExist(userid string) bool {
 		return false
 	}
 	if resp.Kvs == nil || len(resp.Kvs) == 0 {
-		fmt.Println("there is not log of this user")
+		fmt.Println("there is no log of this user")
 		return false
 	}
 	return true
