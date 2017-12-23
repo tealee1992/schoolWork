@@ -113,6 +113,12 @@ func (s *Session) Get(userid string) {
 	}
 	s.Status = string(resp.Kvs[0].Value)
 
+	resp, err = etcdcli.Get(context.TODO(), "/user/"+userid+"/Url")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	s.Url = string(resp.Kvs[0].Value)
 }
 
 //判断是否存在该user的session
