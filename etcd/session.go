@@ -131,9 +131,13 @@ func (s Session) IsExist(userid string) bool {
 	resp, err := etcdcli.Get(context.TODO(), "/user/"+userid+"/IP")
 	if err != nil {
 		fmt.Println(err)
+		fmt.Println("etcd Get err")
 		return false
 	}
-	fmt.Println(resp.Kvs[0].Value)
+	if resp == nil {
+		fmt.Println("there is not log of this user")
+		return false
+	}
 	return true
 }
 

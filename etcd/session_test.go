@@ -49,6 +49,6 @@ import (
 func Test_exist(t *testing.T) {
 	var labSession Session
 	b := labSession.IsExist("111")
-	fmt.println(b)
+	fmt.Println(b)
 	fmt.Println("end of GET")
 }
