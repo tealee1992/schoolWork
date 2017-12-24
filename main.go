@@ -300,10 +300,11 @@ func checkpoint(w http.ResponseWriter, r *http.Request) {
 	labSession.Get(userid)
 	//通过docker exec 执行保存eclipse的脚本
 	saveCMD := "docker -H " + varpac.Master.IP + ":3375 " +
-		"exec -ti " + labSession.ConID + " bash -c 'export DISPLAY=:1 && bash /tempfiles/eclipseReload.sh'"
+		"exec -i " + labSession.ConID + " bash -c \"export DISPLAY=:1 && bash /tempfiles/eclipseReload.sh\""
 
 	loger.Println(saveCMD)
 	_, err := exec.Command("/bin/bash", "-c", saveCMD).Output()
+
 	if err != nil {
 		loger.Println(err)
 		entry.Code = "fail"
