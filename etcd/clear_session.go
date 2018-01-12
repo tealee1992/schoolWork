@@ -73,7 +73,7 @@ func (s Session) Set(userid string) {
 		fmt.Println(err)
 		return
 	}
-	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", "created")
+	_, err = etcdcli.Put(context.TODO(), "/user/"+userid+"/Status", s.Status)
 	if err != nil {
 		fmt.Println(err)
 		return
