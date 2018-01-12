@@ -177,7 +177,7 @@ func fast(w http.ResponseWriter) {
 	labSession := etcd.Session{
 		IP:     hostip,
 		ConID:  conid,
-		Status: "started",
+		Status: "created",
 		Url:    url,
 	}
 	loger.Println("before set session,userid:" + userid)
@@ -231,7 +231,7 @@ func accurate(w http.ResponseWriter) {
 	labSession := etcd.Session{
 		IP:     hostip,
 		ConID:  conid,
-		Status: "started",
+		Status: "created",
 	}
 	labSession.Set(userid)
 	varpac.AccurateVol()
@@ -265,7 +265,7 @@ func typeBsed(w http.ResponseWriter, cpudemand int) {
 	labSession := etcd.Session{
 		IP:     hostip,
 		ConID:  conid,
-		Status: "started",
+		Status: "created",
 	}
 	labSession.Set(userid)
 	varpac.AccurateVol()
